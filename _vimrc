@@ -1,7 +1,11 @@
 let &pythonthreedll = 'C:\Users\Kasper\python39.dll'
 set novb
+set encoding=utf-8
+set guifont=DejaVu\ Sans:s22
+let g:airline#extensions#ale#enabled = 1
 filetype indent plugin on
 syntax enable
+set completeopt=longest,menuone,preview
 " Specify a directory for plugins
 " - For Neovim: stdpath('data') . '/plugged'
 " - Avoid using standard Vim directory names like 'plugin'
@@ -20,11 +24,9 @@ Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 " On-demand loading
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+Plug 'Shougo/vimproc.vim', {'do' : 'make'}
+Plug 'https://github.com/tpope/vim-dispatch.git'
 Plug 'nickspoons/vim-sharpenup'
-if s:using_snippets
-  Plug 'sirver/ultisnips'
-endif
-
 " Using a non-default branch
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 
@@ -37,10 +39,6 @@ Plug 'OmniSharp/omnisharp-vim'
 
 Plug 'https://github.com/prabirshrestha/asyncomplete.vim.git'
 
-Plug 'itchyny/lightline.vim'
-Plug 'shinchu/lightline-gruvbox.vim'
-Plug 'maximbaz/lightline-ale'
-
 " Plugin outside ~/.vim/plugged with post-update hook
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
@@ -52,6 +50,9 @@ Plug 'junegunn/fzf.vim'
 Plug 'valloric/MatchTagAlways'
 Plug 'jiangmiao/auto-pairs'
 Plug 'dense-analysis/ale'
+Plug 'https://github.com/vim-airline/vim-airline.git'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'https://github.com/powerline/fonts.git'
 
 
 " Initialize plugin system
@@ -74,6 +75,9 @@ autocmd FileType cs nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
 
 set autochdir
 set background=dark
+let g:ale_lint_on_enter = 1
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_text_changed = 'always'
 autocmd vimenter * ++nested colorscheme gruvbox
 
 if (empty($TMUX))
@@ -89,10 +93,12 @@ if (empty($TMUX))
   endif
 endif
 
-noremap d g
+noremap d v
+noremap v b
 noremap e k
+noremap m h
+noremap b t
 noremap f e
-noremap g t
 noremap i l
 noremap j y
 noremap k n
@@ -102,15 +108,12 @@ noremap o p
 noremap p r
 noremap r s
 noremap s d
-noremap t f
 noremap u i
 noremap y o
-noremap D G
+noremap D V
 noremap E K
 noremap F E
-noremap G T
 noremap I L
-noremap J Y
 noremap K N
 noremap L U
 noremap N J
@@ -118,9 +121,11 @@ noremap O P
 noremap P R
 noremap R S
 noremap S D
-noremap T F
+noremap M H
+noremap B T
 noremap U I
-noremap Y O
+noremap J Y
+noremap B V
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -136,10 +141,6 @@ let g:ale_sign_style_warning = '·'
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 " }}}
 
-augroup OmniSharpIntegrations
-  autocmd!
-  autocmd User OmniSharpProjectUpdated,OmniSharpReady call lightline#update()
-augroup END
 
 " Colors: {{{
 augroup ColorschemePreferences
@@ -180,42 +181,58 @@ let g:OmniSharp_highlight_groups = {
 \}
 " }}}
 
-" Lightline: {{{
-  let g:lightline = {
-  \ 'colorscheme': 'gruvbox',
-  \ 'active': {
-  \   'right': [
-  \     ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_infos', 'linter_ok'],
-  \     ['lineinfo'], ['percent'],
-  \     ['fileformat', 'fileencoding', 'filetype', 'sharpenup']
-  \   ]
-  \ },
-  \ 'inactive': {
-  \   'right': [['lineinfo'], ['percent'], ['sharpenup']]
-  \ },
-  \ 'component': {
-  \   'sharpenup': sharpenup#statusline#Build()
-  \ },
-  \ 'component_expand': {
-  \   'linter_checking': 'lightline#ale#checking',
-  \   'linter_infos': 'lightline#ale#infos',
-  \   'linter_warnings': 'lightline#ale#warnings',
-  \   'linter_errors': 'lightline#ale#errors',
-  \   'linter_ok': 'lightline#ale#ok'
-    \  },
-    \ 'component_type': {
-    \   'linter_checking': 'right',
-    \   'linter_infos': 'right',
-    \   'linter_warnings': 'warning',
-    \   'linter_errors': 'error',
-    \   'linter_ok': 'right'
-  \  }
-  \}
 
-" Use unicode chars for ale indicators in the statusline
-let g:lightline#ale#indicator_checking = "\uf110 "
-let g:lightline#ale#indicator_infos = "\uf129 "
-let g:lightline#ale#indicator_warnings = "\uf071 "
-let g:lightline#ale#indicator_errors = "\uf05e "
-let g:lightline#ale#indicator_ok = "\uf00c "
-" }}}
+set updatetime=500
+" Remove 'Press Enter to continue' message when type information is longer than one line.
+set cmdheight=2
+
+" Contextual code actions (requires CtrlP or unite.vim)
+nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
+" Run code actions with text selected in visual mode to extract method
+vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
+
+" rename with dialog
+nnoremap <leader>nm :OmniSharpRename<cr>
+nnoremap <F2> :OmniSharpRename<cr>
+" rename without dialog - with cursor on the symbol to rename... ':Rename newname'
+command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+
+" Force OmniSharp to reload the solution. Useful when switching branches etc.
+nnoremap <leader>rl :OmniSharpReloadSolution<cr>
+nnoremap <leader>cf :OmniSharpCodeFormat<cr>
+" Load the current .cs file to the nearest project
+nnoremap <leader>tp :OmniSharpAddToProject<cr>
+
+" Start the omnisharp server for the current solution
+nnoremap <leader>ss :OmniSharpStartServer<cr>
+nnoremap <leader>sp :OmniSharpStopServer<cr>
+
+" Add syntax highlighting for types and interfaces
+nnoremap <leader>th :OmniSharpHighlightTypes<cr>
+"Don't ask to save when changing buffers (i.e. when jumping to a type definition)
+set hidden
+set cmdheight=4
+
+" air-line
+let g:airline_powerline_fonts = 1
+
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+" enable tabline
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ''
+let g:airline#extensions#tabline#left_alt_sep = ''
+let g:airline#extensions#tabline#right_sep = ''
+let g:airline#extensions#tabline#right_alt_sep = ''
+
+" enable powerline fonts
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
+
+" Switch to your current theme
+let g:airline_theme = 'gruvbox'
+
+" Always show tabs
+set showtabline=2
