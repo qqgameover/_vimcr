@@ -1,7 +1,8 @@
 let &pythonthreedll = 'C:\Users\Kasper\python39.dll'
 set novb
+set nocompatible
 set encoding=utf-8
-set guifont=DejaVu\ Sans:s22
+set guifont=DejaVu\ Sans:s28
 let g:airline#extensions#ale#enabled = 1
 filetype indent plugin on
 syntax enable
@@ -20,13 +21,14 @@ Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 
 " Multiple Plug commands can be written in a single line using | separators
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-
+Plug 'sheerun/vim-polyglot'
 " On-demand loading
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'https://github.com/tpope/vim-dispatch.git'
 Plug 'nickspoons/vim-sharpenup'
+Plug 'https://github.com/keremc/asyncomplete-clang.vim.git'
 " Using a non-default branch
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 
@@ -50,9 +52,11 @@ Plug 'junegunn/fzf.vim'
 Plug 'valloric/MatchTagAlways'
 Plug 'jiangmiao/auto-pairs'
 Plug 'dense-analysis/ale'
+Plug 'chriskempson/base16-vim'
 Plug 'https://github.com/vim-airline/vim-airline.git'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'https://github.com/powerline/fonts.git'
+Plug 'https://github.com/ycm-core/YouCompleteMe.git'
 
 
 " Initialize plugin system
@@ -77,6 +81,7 @@ set autochdir
 set background=dark
 let g:ale_lint_on_enter = 1
 let g:ale_lint_on_save = 1
+let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'always'
 autocmd vimenter * ++nested colorscheme gruvbox
 
@@ -93,50 +98,11 @@ if (empty($TMUX))
   endif
 endif
 
-noremap d v
-noremap v b
-noremap e k
-noremap m h
-noremap b t
-noremap f e
-noremap i l
-noremap j y
-noremap k n
-noremap l u
-noremap n j
-noremap o p
-noremap p r
-noremap r s
-noremap s d
-noremap u i
-noremap y o
-noremap D V
-noremap E K
-noremap F E
-noremap I L
-noremap K N
-noremap L U
-noremap N J
-noremap O P
-noremap P R
-noremap R S
-noremap S D
-noremap M H
-noremap B T
-noremap U I
-noremap J Y
-noremap B V
 set tabstop=4
 set shiftwidth=4
 set expandtab
 set langmenu=en_US.UTF-8
 language messages en_US.UTF-8
-" ALE: {{{
-let g:ale_sign_error = '•'
-let g:ale_sign_warning = '•'
-let g:ale_sign_info = '·'
-let g:ale_sign_style_error = '·'
-let g:ale_sign_style_warning = '·'
 
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 " }}}
@@ -181,6 +147,8 @@ let g:OmniSharp_highlight_groups = {
 \}
 " }}}
 
+autocmd User asyncomplete_setup call asyncomplete#register_source(
+    \ asyncomplete#sources#clang#get_source_options())
 
 set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
@@ -220,19 +188,88 @@ if !exists('g:airline_symbols')
     let g:airline_symbols = {}
 endif
 
-" enable tabline
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#left_sep = ''
-let g:airline#extensions#tabline#left_alt_sep = ''
-let g:airline#extensions#tabline#right_sep = ''
-let g:airline#extensions#tabline#right_alt_sep = ''
+" air-line
+let g:airline_powerline_fonts = 1
 
-" enable powerline fonts
-let g:airline_left_sep = ''
-let g:airline_right_sep = ''
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+" unicode symbols
+let g:airline_left_sep = '»'
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '«'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.linenr = '␊'
+let g:airline_symbols.linenr = '␤'
+let g:airline_symbols.linenr = '¶'
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.paste = 'ρ'
+let g:airline_symbols.paste = 'Þ'
+let g:airline_symbols.paste = '∥'
+let g:airline_symbols.whitespace = 'Ξ'
+
+" airline symbols
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = ''
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
 
 " Switch to your current theme
 let g:airline_theme = 'gruvbox'
 
 " Always show tabs
 set showtabline=2
+
+noremap d v
+noremap v b
+noremap e k
+noremap b t
+noremap f e
+noremap i l
+nnoremap h m|xnoremap h m|onoremap h m 
+noremap m h
+noremap j y
+noremap k n
+noremap l u
+noremap n j
+noremap o p
+noremap p r
+noremap r s
+noremap s d
+noremap u i
+noremap y o
+noremap D V
+noremap E K
+noremap F E
+noremap I L
+noremap K N
+noremap L U
+noremap N J
+nnoremap H M|xnoremap H M|onoremap H M 
+noremap M H
+noremap O P
+noremap P R
+noremap R S
+noremap S D
+noremap B T
+noremap U I
+noremap J Y
+noremap B V
+
+" Turbo navigation (Colemak) {{{
+  " Works with counts, see ":help complex-repeat"
+  nnoremap <silent> M @='5h'<CR>|xnoremap <silent> M @='5h'<CR>|onoremap <silent> M @='5h'<CR>|
+  nnoremap <silent> N @='5gj'<CR>|xnoremap <silent> N @='5gj'<CR>|onoremap <silent> N @='5gj'<CR>|
+  nnoremap <silent> E @='5gk'<CR>|xnoremap <silent> E @='5gk'<CR>|onoremap <silent> E @='5gk'<CR>|
+  nnoremap <silent> I @='5l'<CR>|xnoremap <silent> I @='5l'<CR>|onoremap <silent> I @='5l'<CR>|
+" }}}
+
+colorscheme gruvbox
