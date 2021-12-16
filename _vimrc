@@ -1,7 +1,10 @@
 let &pythonthreedll = 'C:\Users\Kasper\python39.dll'
-set novb
-set nocompatible
 set encoding=utf-8
+set nocompatible
+set langmenu=en_US.UTF-8
+language messages en_US.UTF-8
+let &t_ZH="\e[3m"
+let &t_ZR="\e[23m"
 set guifont=DejaVu\ Sans:s28
 let g:airline#extensions#ale#enabled = 1
 filetype indent plugin on
@@ -15,7 +18,6 @@ call plug#begin('~/.vim/plugged')
 
 " Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
 Plug 'junegunn/vim-easy-align'
-Plug 'https://github.com/morhetz/gruvbox.git'
 " Any valid git URL is allowed
 Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 
@@ -27,8 +29,10 @@ Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'https://github.com/tpope/vim-dispatch.git'
+Plug 'https://github.com/junegunn/limelight.vim.git'
 Plug 'nickspoons/vim-sharpenup'
 Plug 'https://github.com/keremc/asyncomplete-clang.vim.git'
+Plug 'https://github.com/tpope/vim-fugitive.git'
 " Using a non-default branch
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 
@@ -55,6 +59,7 @@ Plug 'dense-analysis/ale'
 Plug 'chriskempson/base16-vim'
 Plug 'https://github.com/vim-airline/vim-airline.git'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'https://github.com/morhetz/gruvbox.git'
 Plug 'https://github.com/powerline/fonts.git'
 Plug 'https://github.com/ycm-core/YouCompleteMe.git'
 
@@ -69,6 +74,7 @@ map <C-n> :NERDTreeToggle<CR>
 map <C-p> :GFiles<CR>
 map <C-f> :Files<CR>
 set number
+set laststatus=2
 set relativenumber
 let mapleader = ","
 
@@ -83,7 +89,6 @@ let g:ale_lint_on_enter = 1
 let g:ale_lint_on_save = 1
 let g:ale_sign_column_always = 1
 let g:ale_lint_on_text_changed = 'always'
-autocmd vimenter * ++nested colorscheme gruvbox
 
 if (empty($TMUX))
   if (has("nvim"))
@@ -107,19 +112,6 @@ language messages en_US.UTF-8
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 " }}}
 
-
-" Colors: {{{
-augroup ColorschemePreferences
-  autocmd!
-  " These preferences clear some gruvbox background colours, allowing transparency
-  autocmd ColorScheme * highlight Normal     ctermbg=NONE guibg=NONE
-  autocmd ColorScheme * highlight SignColumn ctermbg=NONE guibg=NONE
-  autocmd ColorScheme * highlight Todo       ctermbg=NONE guibg=NONE
-  " Link ALE sign highlights to similar equivalents without background colours
-  autocmd ColorScheme * highlight link ALEErrorSign   WarningMsg
-  autocmd ColorScheme * highlight link ALEWarningSign ModeMsg
-  autocmd ColorScheme * highlight link ALEInfoSign    Identifier
-augroup END
 
 " OmniSharp: {{{
 let g:OmniSharp_popup_position = 'peek'
@@ -150,7 +142,7 @@ let g:OmniSharp_highlight_groups = {
 autocmd User asyncomplete_setup call asyncomplete#register_source(
     \ asyncomplete#sources#clang#get_source_options())
 
-set updatetime=500
+set updatetime=2000
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
 
@@ -183,14 +175,7 @@ set cmdheight=4
 
 " air-line
 let g:airline_powerline_fonts = 1
-
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-endif
-
-" air-line
-let g:airline_powerline_fonts = 1
-
+let g:airline_theme='gruvbox'
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
 endif
@@ -219,57 +204,25 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
-" Switch to your current theme
-let g:airline_theme = 'gruvbox'
+let g:limelight_default_coefficient = 0.8
+
+nnoremap <Leader>l :Limelight 0.8<cr>
 
 " Always show tabs
-set showtabline=2
-
-noremap d v
-noremap v b
-noremap e k
-noremap b t
-noremap f e
-noremap i l
-nnoremap h m|xnoremap h m|onoremap h m 
-noremap m h
-noremap j y
-noremap k n
-noremap l u
-noremap n j
-noremap o p
-noremap p r
-noremap r s
-noremap s d
-noremap u i
-noremap y o
-noremap D V
-noremap E K
-noremap F E
-noremap I L
-noremap K N
-noremap L U
-noremap N J
-nnoremap H M|xnoremap H M|onoremap H M 
-noremap M H
-noremap O P
-noremap P R
-noremap R S
-noremap S D
-noremap B T
-noremap U I
-noremap J Y
-noremap B V
-
-" Turbo navigation (Colemak) {{{
-  " Works with counts, see ":help complex-repeat"
-  nnoremap <silent> M @='5h'<CR>|xnoremap <silent> M @='5h'<CR>|onoremap <silent> M @='5h'<CR>|
-  nnoremap <silent> N @='5gj'<CR>|xnoremap <silent> N @='5gj'<CR>|onoremap <silent> N @='5gj'<CR>|
-  nnoremap <silent> E @='5gk'<CR>|xnoremap <silent> E @='5gk'<CR>|onoremap <silent> E @='5gk'<CR>|
-  nnoremap <silent> I @='5l'<CR>|xnoremap <silent> I @='5l'<CR>|onoremap <silent> I @='5l'<CR>|
-" }}}
-
+set showtabline=4
+nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
+let g:ycm_add_preview_to_completeopt = 1
+nmap <leader>D <Plug>(YCMHover)
+augroup MyYCMCustom
+  autocmd!
+  autocmd FileType c,cpp let b:ycm_hover = {
+    \ 'command': 'GetDoc',
+    \ 'syntax': &filetype
+    \ }
+augroup END
+set background=dark
+let g:gruvbox_italic=1
 colorscheme gruvbox
+let g:airline#extensions#tabline#enabled = 1
