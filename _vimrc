@@ -1,36 +1,12 @@
+set nocompatible
 let &pythonthreedll = 'C:\Users\Kasper\python39.dll'
 set encoding=utf-8
-set nocompatible
 set langmenu=en_US.UTF-8
-language messages en_US.UTF-8
-let g:powerline_pycmd = 'py3'
-set laststatus=2
-set t_Co=256
-set tabstop=4
-set shiftwidth=4
-set expandtab
-set langmenu=en_US.UTF-8
-set autochdir
-set background=dark
-language messages en_US.UTF-8
-set number
-set laststatus=2
-set relativenumber
-set hidden
-set cmdheight=4
-set updatetime=2000
-" Always show tabs
-set showtabline=4
+set guifont=Hack:s28
 
-set guifont=Source\ Code\ Pro\ Semibold:s28
 filetype indent plugin on
 syntax enable
-set completeopt=longest,menuone,preview
-
-execute pathogen#infect()
-source $HOME\.vim\plugged\powerline\powerline\bindings\vim\plugin\powerline.vim
-python3 from powerline.vim import setup as powerline_setup;
-python3 powerline_setup()
+"let g:powerline_pycmd = 'py3'
 
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/vim-easy-align'
@@ -38,10 +14,8 @@ Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 Plug 'sheerun/vim-polyglot'
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
-Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'https://github.com/tpope/vim-dispatch.git'
-Plug 'https://github.com/junegunn/limelight.vim.git'
 Plug 'nickspoons/vim-sharpenup'
 Plug 'https://github.com/keremc/asyncomplete-clang.vim.git'
 Plug 'https://github.com/tpope/vim-fugitive.git'
@@ -54,7 +28,6 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'dense-analysis/ale'
-Plug 'chriskempson/base16-vim'
 Plug 'https://github.com/morhetz/gruvbox.git'
 Plug 'https://github.com/powerline/fonts.git'
 Plug 'https://github.com/ycm-core/YouCompleteMe.git'
@@ -162,12 +135,6 @@ nnoremap <leader>sp :OmniSharpStopServer<cr>
 nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 
-set statusline+=%#warningmsg#
-set statusline+=%*
-let g:limelight_default_coefficient = 0.8
-
-nnoremap <Leader>l :Limelight 0.8<cr>
-
 nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
 let g:ycm_add_preview_to_completeopt = 1
 nmap <leader>D <Plug>(YCMHover)
@@ -179,7 +146,29 @@ augroup MyYCMCustom
     \ }
 augroup END
 
+"powerline stuff
+let g:Powerline_symbols='fancy'
+
+source $HOME\.vim\plugged\powerline\powerline\bindings\vim\plugin\powerline.vim
+python3 from powerline.vim import setup as powerline_setup;
+python3 powerline_setup()
+
+"general stufferino
+set laststatus=2
+set t_Co=256
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smarttab
+set autoindent
+set autochdir
 set background=dark
-let g:gruvbox_italic=1
-let g:gruvbox_contrast_dark = 'soft'
+set number
+set relativenumber
+set hidden
+set cmdheight=4
+set updatetime=2000
+
+" Always show tabs
+set showtabline=4
 colorscheme gruvbox
