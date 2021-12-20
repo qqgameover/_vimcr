@@ -6,7 +6,6 @@ set guifont=Hack:s28
 
 filetype indent plugin on
 syntax enable
-"let g:powerline_pycmd = 'py3'
 
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/vim-easy-align'
@@ -147,6 +146,8 @@ augroup MyYCMCustom
 augroup END
 
 "powerline stuff
+let g:powerline_pycmd = 'py3'
+
 let g:Powerline_symbols='fancy'
 
 source $HOME\.vim\plugged\powerline\powerline\bindings\vim\plugin\powerline.vim
