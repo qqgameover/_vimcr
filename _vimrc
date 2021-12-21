@@ -2,23 +2,26 @@ set nocompatible
 let &pythonthreedll = 'C:\Users\Kasper\python39.dll'
 set encoding=utf-8
 set langmenu=en_US.UTF-8
+language messages en_US.UTF-8
+syntax enable 
 set guifont=Hack:s28
-
+let g:ale_completion_enabled=1
+set completeopt=longest,menuone,preview
 filetype indent plugin on
-syntax enable
-
+execute pathogen#infect()
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/vim-easy-align'
 Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-Plug 'sheerun/vim-polyglot'
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'https://github.com/tpope/vim-dispatch.git'
-Plug 'nickspoons/vim-sharpenup'
 Plug 'https://github.com/keremc/asyncomplete-clang.vim.git'
 Plug 'https://github.com/tpope/vim-fugitive.git'
 Plug 'https://github.com/powerline/powerline'
+Plug 'https://github.com/nickspoons/vim-sharpenup.git'
+Plug 'https://github.com/octol/vim-cpp-enhanced-highlight.git'
+Plug 'OmniSharp/omnisharp-vim'
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -29,11 +32,9 @@ Plug 'plasticboy/vim-markdown'
 Plug 'dense-analysis/ale'
 Plug 'https://github.com/morhetz/gruvbox.git'
 Plug 'https://github.com/powerline/fonts.git'
-Plug 'https://github.com/ycm-core/YouCompleteMe.git'
 Plug 'fatih/vim-go', { 'tag': '*' }
 :
 Plug 'nsf/gocode', { 'tag': 'v.20150303', 'rtp': 'vim' }
-Plug 'OmniSharp/omnisharp-vim'
 Plug 'https://github.com/prabirshrestha/asyncomplete.vim.git'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug '~/my-prototype-plugin'
@@ -47,27 +48,10 @@ map <C-p> :GFiles<CR>
 map <C-f> :Files<CR>
 let mapleader = ","
 
-autocmd FileType cs nmap <silent> gd :OmniSharpGotoDefinition<CR>
-autocmd FileType cs nnoremap <buffer> <Leader>fu :OmniSharpFindUsages<CR>
-autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
-autocmd FileType cs nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
-
+"Ale stuff:
 let g:ale_lint_on_enter = 1
-let g:ale_lint_on_save = 1
-let g:ale_sign_column_always = 1
-let g:ale_lint_on_text_changed = 'always'
 
-if (empty($TMUX))
-  if (has("nvim"))
-    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-  endif
-  if (has("termguicolors"))
-    set termguicolors
-  endif
-endif
-
-
-let g:ale_linters = { 'cs': ['OmniSharp'], 'cpp': ['clangtidy'], 'c': ['clangtidy'] }
+let g:ale_linters = { 'cs': ['OmniSharp'], 'cpp': ['clangd']}
 " }}}
 
 let g:ale_cpp_clangtidy_checks = []
@@ -77,6 +61,25 @@ let g:ale_cpp_clangtidy_extra_options = ''
 let g:ale_cpp_clangtidy_options = ''
 let g:ale_set_balloons=1
 let g:ale_linters_explicit=1
+let g:ale_cpp_clangtidy_checks = []
+let g:ale_sign_error = '!'
+let g:ale_sign_warning = '?'
+highlight ALEErrorSign ctermbg=NONE ctermfg=red
+highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
+
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
+nnoremap <leader>agd :ALEGoToDefinition<cr>
+nnoremap <leader>a<space> :ALECodeAction<cr>
+nnoremap <leader>as :ALESymbolSearch<cr>
+nnoremap <leader>afr :ALEFindReferences<cr>
+nnoremap <leader>ah :ALEHover<cr>
+
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
 
 " OmniSharp: {{{
 let g:OmniSharp_popup_position = 'peek'
@@ -110,9 +113,9 @@ autocmd User asyncomplete_setup call asyncomplete#register_source(
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 
 " Contextual code actions (requires CtrlP or unite.vim)
-nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
+nnoremap <leader>o<space> :OmniSharpGetCodeActions<cr>
 " Run code actions with text selected in visual mode to extract method
-vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
+vnoremap <leader>o<space> :call OmniSharp#GetCodeActions('visual')<cr>
 
 " rename with dialog
 nnoremap <leader>nm :OmniSharpRename<cr>
@@ -134,25 +137,33 @@ nnoremap <leader>sp :OmniSharpStopServer<cr>
 nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 
+if (empty($TMUX))
+  if (has("nvim"))
+    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+  endif
+  if (has("termguicolors"))
+    set termguicolors
+  endif
+endif
+
+autocmd User asyncomplete_setup call asyncomplete#register_source(
+\ asyncomplete#sources#clang#get_source_options())
+
 nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
-let g:ycm_add_preview_to_completeopt = 1
-nmap <leader>D <Plug>(YCMHover)
-augroup MyYCMCustom
-  autocmd!
-  autocmd FileType c,cpp let b:ycm_hover = {
-    \ 'command': 'GetDoc',
-    \ 'syntax': &filetype
-    \ }
-augroup END
 
 "powerline stuff
 let g:powerline_pycmd = 'py3'
-
 let g:Powerline_symbols='fancy'
 
 source $HOME\.vim\plugged\powerline\powerline\bindings\vim\plugin\powerline.vim
 python3 from powerline.vim import setup as powerline_setup;
 python3 powerline_setup()
+
+"cpp syntax
+let g:cpp_class_scope_highlight = 1
+"let g:cpp_member_variable_highlight = 1
+"let g:cpp_class_decl_highlight = 1
+"let g:cpp_experimental_template_highlight = 1
 
 "general stufferino
 set laststatus=2
@@ -169,7 +180,7 @@ set relativenumber
 set hidden
 set cmdheight=4
 set updatetime=2000
-
+let c_no_curly_error=1
 " Always show tabs
 set showtabline=4
-colorscheme gruvbox
+colorscheme gruvbox 
